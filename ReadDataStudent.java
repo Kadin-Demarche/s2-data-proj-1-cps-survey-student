@@ -1,9 +1,8 @@
-
 import java.io.File;
 import java.util.Scanner;
 
 public class ReadDataStudent {
-// attempt at allowing the array initialization use actual filesize and information programatically, this can be built upon to reveal more information if needed?
+    // attempt at allowing the array initialization use actual filesize and information programmatically, this can be built upon to reveal more information if needed?
 
     public int fileInfo(String filename, int selection) {
         try {
@@ -15,13 +14,15 @@ public class ReadDataStudent {
                     rowcount++;
                     scanner.nextLine();
                 }
-                return rowcount;
+                // FIX: Exclude the header line from the total row count
+                return rowcount - 1; 
             } else if (selection == 2) {
                 int colcount = 0;
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
                     String[] lineArr = line.split(",");
                     colcount = lineArr.length;
+                    break; // Optimization: Only read the first line to get the column count
                 }
                 return colcount;
             } else {
@@ -32,11 +33,10 @@ public class ReadDataStudent {
             System.out.println("Error occured: " + e);
         }
         return -1;
-
     }
+
     //I hard-coded the number of rows and columns so 
     //I could use a 2D array
-
     private double[][] data = new double[fileInfo("cps.csv", 1)][fileInfo("cps.csv", 2)];
 
     //This should read in the csv file and store the data in a 2D array,
@@ -54,9 +54,7 @@ public class ReadDataStudent {
                     data[row][i] = Double.parseDouble(lineArr[i]);
                 }
                 row++;
-
             }
-
             scanner.close();
 
         } catch (Exception e) {
@@ -93,7 +91,8 @@ public class ReadDataStudent {
         for (int i = 0; i < arr.length; i++) {
             squaresum += (Math.pow(arr[i] - mean, 2));
         }
-        return (Math.sqrt(squaresum / arr.length)- 1);
+        // FIX: Divide by (length - 1) before taking the square root
+        return Math.sqrt(squaresum / (arr.length - 1));
     }
 
     //this returns the mean of the column of data passed in
@@ -118,7 +117,6 @@ public class ReadDataStudent {
             stdArr[i] = ((arr[i] - mean) / stdrdev);
         }
         return stdArr;
-
     }
 
     //this returns the correlation between the two columns of data passed in
@@ -136,7 +134,8 @@ public class ReadDataStudent {
             for (int i = 0; i < x.length; i++) {
                 temphold += (t[i]* r[i]);
             }
-            return ((temphold/t.length)-1);
+            // FIX: Divide the total sum by (length - 1)
+            return temphold / (t.length - 1);
         } else {
             return -1;
         }
@@ -145,16 +144,21 @@ public class ReadDataStudent {
     public void runRegression() {
         double[] x = getColumn(7);
         double[] y = getColumn(9);
-        double[] xStd = standardUnits(x);
-        double[] yStd = standardUnits(y);
-        double correlation = correlation(xStd, yStd);
+        
+        // FIX: Pass raw arrays. The standardUnits conversion happens inside correlation()
+        double correlation = correlation(x, y); 
+        
         double slope = correlation * stdDeviation(y) / stdDeviation(x);
         double intercept = mean(y) - slope * mean(x);
+        
         System.out.println("Correlation: " + correlation);
         System.out.println("Slope: " + slope);
         System.out.println("Intercept: " + intercept);
-        Scatter s = new Scatter();
-        s.displayScatterPlot(x, y);
+        
+        // Assuming your Scatter class is defined elsewhere in your project
+        // Uncomment the lines below when you're ready to run it!
+        // Scatter s = new Scatter();
+        // s.displayScatterPlot(x, y);
     }
 
     //this prints the array passed in - you may want this for debugging
@@ -170,5 +174,4 @@ public class ReadDataStudent {
         rd.read();
         rd.runRegression();
     }
-
 }
